@@ -4,6 +4,7 @@ import numpy
 from pandas import DataFrame
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 from sklearn.cross_validation import KFold
 from sklearn.metrics import confusion_matrix, f1_score
@@ -13,11 +14,8 @@ NEWLINE = '\n'
 HAM = 'ham'
 SPAM = 'spam'
 
-SOURCES = [
-    ('data/spam',        SPAM),
-    ('data/easy_ham',    HAM),
-    ('data/hard_ham',    HAM),
-    ('data/beck-s',      HAM),
+
+'''('data/beck-s',      HAM),
     ('data/farmer-d',    HAM),
     ('data/kaminski-v',  HAM),
     ('data/kitchen-l',   HAM),
@@ -25,7 +23,12 @@ SOURCES = [
     ('data/williams-w3', HAM),
     ('data/BG',          SPAM),
     ('data/GP',          SPAM),
-    ('data/SH',          SPAM)
+    ('data/SH',          SPAM)'''
+
+SOURCES = [
+    ('data/spam',        SPAM),
+    ('data/easy_ham',    HAM),
+    ('data/hard_ham',    HAM)
 ]
 
 SKIP_FILES = {'cmds'}
@@ -72,6 +75,16 @@ pipeline = Pipeline([
     ('classifier',         MultinomialNB())
 ])
 
+pipeline_SVM = Pipeline([
+    ('count_vectorizer',   CountVectorizer(ngram_range=(1, 2))),
+    ('classifier',         SVC())
+])
+
+pipeline_KMeans = Pipeline([
+    ('count_vectorizer',   CountVectorizer(ngram_range=(1, 2))),
+    ('classifier',         MultinomialNB())
+])
+
 k_fold = KFold(n=len(data), n_folds=6)
 scores = []
 confusion = numpy.array([[0, 0], [0, 0]])
@@ -82,8 +95,8 @@ for train_indices, test_indices in k_fold:
     test_text = data.iloc[test_indices]['text'].values
     test_y = data.iloc[test_indices]['class'].values.astype(str)
 
-    pipeline.fit(train_text, train_y)
-    predictions = pipeline.predict(test_text)
+    pipeline_SVM.fit(train_text, train_y)
+    predictions = pipeline_SVM.predict(test_text)
 
     confusion += confusion_matrix(test_y, predictions)
     score = f1_score(test_y, predictions, pos_label=SPAM)
@@ -93,3 +106,7 @@ print('Total emails classified:', len(data))
 print('Score:', sum(scores)/len(scores))
 print('Confusion matrix:')
 print(confusion)
+print("TP::",confusion[0][0])
+print("TN::",confusion[1][1])
+print("FP::",confusion[0][1])
+print("FN::",confusion[1][0])
