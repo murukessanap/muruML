@@ -11,7 +11,7 @@ if PLOTLY_USERNAME:
 
 
 def genPoints():
-    with open("data/spambase.csv") as f:
+    with open("spambase.csv") as f:
         for line in f:
             arr = []
             arr = line.split(",")
@@ -24,7 +24,8 @@ def genPoints():
                 farr.append(float(s)) 
             yield Point(farr)
 
-def main():
+def main2():
+    print("\n\n\n\nKMeans::")
     num_points = 10
     dimensions = 57
     lower = 0
@@ -34,6 +35,7 @@ def main():
     #points = [makeRandomPoint(dimensions, lower, upper) for i in xrange(num_points)]
     points = [p for p in genPoints()]
     print "no of points::", len(points)
+    tr_size = len(points)
     clusters = kmeans(points, num_clusters, opt_cutoff)
     if len(clusters[0].points) > len(clusters[1].points):
         print "no of spam =", len(clusters[1].points), "\nno of ham =", len(clusters[0].points)
@@ -55,11 +57,9 @@ def main():
         for p in clusters[0].points:
             if p.coords[-1] == 1:
               cs_c = cs_c + 1
-        print "no of spam correctly classified =", cs_c, "\nno of spam wrongly classified =", len(clusters[0].points) - cs_c
-        print "\nno of ham correctly classified =", ch_c, "\nno of ham wrongly classified =", len(clusters[1].points) - ch_c
-    #for i,c in enumerate(clusters):
-    #    for p in c.points:
-    #        print " Cluster: ", i, "\t Point :", p
+        print "no of spam correctly classified(TN) =", cs_c, "\nno of spam wrongly classified(FN) =", len(clusters[0].points) - cs_c
+        print "\nno of ham correctly classified(TP) =", ch_c, "\nno of ham wrongly classified(FP) =", len(clusters[1].points) - ch_c
+        print "accuracy = ", (float(ch_c+cs_c)*100)/tr_size, "%"   
     
 
 class Point:
@@ -135,6 +135,3 @@ def getDistance(a, b):
 def makeRandomPoint(n, lower, upper):
     p = Point([random.uniform(lower, upper) for i in range(n)])
     return p
-
-if __name__ == "__main__": 
-    main()

@@ -79,15 +79,29 @@ def getPredictions(summaries, testSet):
  
 def getAccuracy(testSet, predictions):
 	correct = 0
+        TP,TN,FP,FN=0,0,0,0
 	for i in range(len(testSet)):
-		if testSet[i][-1] == predictions[i]:
-			correct += 1
+                if testSet[i][-1] == predictions[i]:
+                    if predictions[i] == 0:
+                        TP = TP + 1
+                    else:
+                        TN = TN + 1
+                    correct += 1
+                else:
+                    if predictions[i] == 0:
+                        FP = FP + 1
+                    else:
+                        FN = FN + 1
+		#if testSet[i][-1] == predictions[i]:
+		#	correct += 1
+        print('[TP=',TP,",TN=",TN)
+        print('FN=',FN,",FP=",FP,"]")
 	return (correct/float(len(testSet))) * 100.0
  
-def main():
-	#filename = 'pima-indians-diabetes.data.csv'
-        filename = 'data/spambase.csv'
-	splitRatio = 0.67
+def main1():
+        print("NAIVE BAYES:::")
+        filename = 'spambase.csv'
+	splitRatio = 0.9
 	dataset = loadCsv(filename)
 	trainingSet, testSet = splitDataset(dataset, splitRatio)
 	print('Split {0} rows into train={1} and test={2} rows').format(len(dataset), len(trainingSet), len(testSet))
@@ -97,5 +111,3 @@ def main():
 	predictions = getPredictions(summaries, testSet)
 	accuracy = getAccuracy(testSet, predictions)
 	print('Accuracy: {0}%').format(accuracy)
- 
-main()
